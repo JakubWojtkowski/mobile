@@ -7,6 +7,14 @@ type Props = {
   index: number;
 };
 
+const idToColumnText: {
+  [key in TypedColumn]: string;
+} = {
+  todo: "To do",
+  inprogress: "In Progress",
+  done: "Done",
+};
+
 function Column({ id, todos, index }: Props) {
   return (
     <Draggable draggableId={id} index={index}>
@@ -16,6 +24,7 @@ function Column({ id, todos, index }: Props) {
           {...provided.dragHandleProps}
           ref={provided.innerRef}
         >
+          {/* render droppable todos */}
           <Droppable droppableId={index.toString()} type="card">
             {(provided, snapshot) => (
               <div
@@ -25,7 +34,7 @@ function Column({ id, todos, index }: Props) {
                   snapshot.isDraggingOver ? "bg-green-200" : "bg-white/50"
                 }`}
               >
-                <h2>{id}</h2>
+                <h2>{idToColumnText[id]}</h2>
               </div>
             )}
           </Droppable>
