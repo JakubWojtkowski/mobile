@@ -11,11 +11,11 @@ const formatTodosForAI = (board: Board) => {
         (map, [key, value]) => {
             map[key as TypedColumn] = value.length;
             return map;
-
-        }, {} as { [key in TypedColumn]: number });
+        },
+        {} as { [key in TypedColumn]: number }
+    );
 
     return flatArrayCounted;
-
 };
 
 export default formatTodosForAI;

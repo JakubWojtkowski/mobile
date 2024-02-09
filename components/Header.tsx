@@ -25,6 +25,8 @@ function Header() {
       setSuggestion(suggestion);
       setLoading(false);
     };
+
+    fetchSuggestionFunc();
   }, [board]);
 
   return (
@@ -84,8 +86,13 @@ function Header() {
           className="flex items-center text-sm font-light bg-white pr-5 shadow-xl
         rounded-xl w-fit italic max-w-3xl text-[#0055d1]"
         >
-          <UserCircleIcon className="inline-block h-10 w-10 text-[#0055d1] mr-1" />
-          GPT is summarising your tasks for the day...
+          <UserCircleIcon
+            className={`inline-block h-10 w-10 text-[#0055d1] mr-1 
+            ${loading && "animate-spin"}`}
+          />
+          {suggestion && !loading
+            ? suggestion
+            : "GPT is summarising your tasks for the day..."}
         </p>
       </div>
     </header>
