@@ -13,7 +13,7 @@ type Props = {
   id: TypedColumn;
   innerRef: (element: HTMLElement | null) => void;
   draggableProps: DraggableProvidedDraggableProps;
-  dragHandleProps: DraggableProvidedDragHandleProps;
+  dragHandleProps: DraggableProvidedDragHandleProps | null | undefined;
 };
 
 function TodoCard({
