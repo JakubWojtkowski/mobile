@@ -1,5 +1,6 @@
 import { databases, storage } from '@/appwrite';
 import { getTodosGroupedByColumn } from '@/lib/getTodosGroupedByColumn';
+import uploadImage from '@/lib/uploadImage';
 import { create } from 'zustand';
 
 interface BoardState {
@@ -7,8 +8,18 @@ interface BoardState {
     getBoard: () => void;
     setBoardState: (board: Board) => void;
     updateTodoInDB: (todo: Todo, columnId: TypedColumn) => void;
+
+    newTaskInput: string;
+    newTaskType: TypedColumn;
+    image: File | null;
+
+    setNewTaskInput: (input: string) => void;
+    setNewTaskType: (columnId: TypedColumn) => void;
     searchString: string;
     setSearchString: (searchString: string) => void;
+    setImage: (image: File | null) => void;
+
+    addTask: (todo: string, columnId: TypedColumn, image?: File | null) => void;
     deleteTask: (taskIndex: number, todoId: Todo, id: TypedColumn) => void;
 }
 
@@ -16,7 +27,12 @@ export const useBoardStore = create<BoardState>((set, get) => ({
     board: {
         columns: new Map<TypedColumn, Column>(),
     },
+
     searchString: "",
+    newTaskInput: "",
+    newTaskType: "todo",
+    image: null,
+
     setSearchString: (searchString: string) => set({ searchString }),
 
     getBoard: async () => {
@@ -25,6 +41,8 @@ export const useBoardStore = create<BoardState>((set, get) => ({
     },
 
     setBoardState: (board) => set({ board }),
+    setImage: (image: File | null) => set({ image }),
+
 
     deleteTask: async (taskIndex: number, todo: Todo, id: TypedColumn) => {
         const newColumns = new Map(get().board.columns);
@@ -45,6 +63,24 @@ export const useBoardStore = create<BoardState>((set, get) => ({
         )
     },
 
+    setNewTaskInput: (input: string) => set({ newTaskInput: input }),
+    setNewTaskType: (columnId: TypedColumn) => set({
+        newTaskType: columnId
+    }),
+
+    addTask: async (todo: string, columnId: TypedColumn, image?: File | null) => {
+        let file: File | undefined;
+
+        if (image) {
+            const flleUploaded = await uploadImage(image);
+            if (flleUploaded) {
+                file = {
+                    bucketId: flleUploaded.bucketId,
+                    fileId: flleUploaded.$id,
+                };
+            }
+        }
+    },
 
     updateTodoInDB: async (todo, colunnId) => {
         await databases.updateDocument(
