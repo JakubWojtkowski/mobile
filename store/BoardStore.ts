@@ -1,4 +1,4 @@
-import { databases, storage } from '@/appwrite';
+import { ID, databases, storage } from '@/appwrite';
 import { getTodosGroupedByColumn } from '@/lib/getTodosGroupedByColumn';
 import uploadImage from '@/lib/uploadImage';
 import { create } from 'zustand';
@@ -69,7 +69,7 @@ export const useBoardStore = create<BoardState>((set, get) => ({
     }),
 
     addTask: async (todo: string, columnId: TypedColumn, image?: File | null) => {
-        let file: File | undefined;
+        let file: Image | undefined;
 
         if (image) {
             const flleUploaded = await uploadImage(image);
@@ -80,6 +80,50 @@ export const useBoardStore = create<BoardState>((set, get) => ({
                 };
             }
         }
+
+        const { $id } = await databases.createDocument(
+            process.env.NEXT_PUBLIC_DATABASE_ID!,
+            process.env.NEXT_PUBLIC_TODOS_COLLECTION_ID!,
+            ID.unique(),
+            {
+                title: todo,
+                status: columnId,
+                // include image if it exists
+                ...(file && { image: JSON.stringify(file) }),
+            }
+        );
+
+        set({ newTaskInput: "" });
+
+        set((state) => {
+            const newColumns = new Map(state.board.columns);
+
+            const newTodo: Todo = {
+                $id,
+                $createdAt: new Date().toISOString(),
+                title: todo,
+                status: columnId,
+                // include image if it exists
+                ...(file && { image: file }),
+            };
+
+            const column = newColumns.get(columnId);
+
+            if (!column) {
+                newColumns.set(columnId, {
+                    id: columnId,
+                    todos: [newTodo],
+                });
+            } else {
+                newColumns.get(columnId)?.todos.push(newTodo);
+            }
+
+            return {
+                board: {
+                    columns: newColumns,
+                }
+            }
+        })
     },
 
     updateTodoInDB: async (todo, colunnId) => {
